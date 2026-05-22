@@ -25,8 +25,6 @@ class _ConversationScreenState extends State<ConversationScreen> {
     super.initState();
     textController = TextEditingController(text: widget.initialText);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final app = ControllerScope.of(context);
-      app.markChatRead();
       _scrollToBottom();
     });
   }
@@ -52,7 +50,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   Widget build(BuildContext context) {
     final app = ControllerScope.of(context);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+    final hasUnread = app.snapshot.unreadFor(app.currentUser.id) > 0;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+      if (hasUnread) {
+        app.markChatRead();
+      }
+    });
     return Scaffold(
       appBar: AppBar(
         title: Row(
