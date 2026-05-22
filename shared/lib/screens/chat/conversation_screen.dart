@@ -63,7 +63,16 @@ class _ConversationScreenState extends State<ConversationScreen> {
               size: 36,
             ),
             const SizedBox(width: 10),
-            Expanded(child: Text(app.peer.name)),
+            Expanded(
+              child: Text(
+                app.peer.name,
+                style: const TextStyle(
+                  color: WtfColors.ink,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+            ),
           ],
         ),
         actions: [
@@ -149,7 +158,7 @@ class _MessageBubble extends StatelessWidget {
         child: Center(
           child: StatusPill(
             label: message.text,
-            color: WtfColors.mutedInk,
+            color: WtfColors.ink.withValues(alpha: 0.7),
             icon: Icons.info_outline,
           ),
         ),
@@ -208,8 +217,8 @@ class _MessageBubble extends StatelessWidget {
                       formatTime(message.createdAt),
                       style: TextStyle(
                         color: mine
-                            ? Colors.white.withValues(alpha: 0.75)
-                            : WtfColors.mutedInk,
+                            ? Colors.white.withValues(alpha: 0.85)
+                            : WtfColors.ink.withValues(alpha: 0.6),
                         fontSize: 11,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
@@ -274,7 +283,16 @@ class _QuickReplies extends StatelessWidget {
         itemCount: replies.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) => ActionChip(
-          label: Text(replies[index]),
+          backgroundColor: WtfColors.surface,
+          side: const BorderSide(color: WtfColors.line),
+          label: Text(
+            replies[index],
+            style: const TextStyle(
+              color: WtfColors.ink,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
           onPressed: () => onReply(replies[index]),
         ),
       ),
@@ -307,8 +325,7 @@ class _InputBar extends StatelessWidget {
                 maxLines: 4,
                 textInputAction: TextInputAction.newline,
                 decoration: const InputDecoration(
-                  hintText: 'Message',
-                  labelText: 'Message',
+                  hintText: 'Type a message...',
                 ),
               ),
             ),

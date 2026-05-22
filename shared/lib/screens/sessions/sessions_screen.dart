@@ -32,6 +32,16 @@ class _SessionsScreenState extends State<SessionsScreen> {
               ChoiceChip(
                 selected: filter == value,
                 label: Text(value),
+                labelStyle: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: filter == value ? Colors.white : WtfColors.ink,
+                ),
+                selectedColor: Theme.of(context).colorScheme.primary,
+                backgroundColor: WtfColors.surface,
+                side: BorderSide(
+                  color: filter == value ? Colors.transparent : WtfColors.line,
+                ),
                 onSelected: (_) => setState(() => filter = value),
               ),
           ],

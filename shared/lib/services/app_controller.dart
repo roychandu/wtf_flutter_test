@@ -34,7 +34,7 @@ class AppController extends ChangeNotifier {
     ready = true;
     notifyListeners();
     _poller = Timer.periodic(
-      const Duration(milliseconds: 1200),
+      const Duration(milliseconds: 500),
       (_) => refresh(silent: true),
     );
   }
@@ -57,8 +57,29 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> refresh({bool silent = false}) async {
+    var hasChanged = false;
     try {
-      snapshot = await bridge.fetchState();
+      final oldMessagesHash = snapshot.messages.map((m) => '${m.id}:${m.status.name}').join(',');
+      final oldTyping = otherSideTyping;
+      final oldRequestsHash = snapshot.requests.map((r) => '${r.id}:${r.status.name}:${r.scheduledFor.millisecondsSinceEpoch}:${r.roomMeta?.id}').join(',');
+      final oldSessionsHash = snapshot.sessions.map((s) => '${s.id}:${s.rating}:${s.trainerNotes}:${s.memberNotes}').join(',');
+      final oldLogsHash = snapshot.logs.join(',');
+
+      final nextSnapshot = await bridge.fetchState();
+
+      final newMessagesHash = nextSnapshot.messages.map((m) => '${m.id}:${m.status.name}').join(',');
+      final newTyping = role == AppRole.member ? nextSnapshot.trainerTyping : nextSnapshot.memberTyping;
+      final newRequestsHash = nextSnapshot.requests.map((r) => '${r.id}:${r.status.name}:${r.scheduledFor.millisecondsSinceEpoch}:${r.roomMeta?.id}').join(',');
+      final newSessionsHash = nextSnapshot.sessions.map((s) => '${s.id}:${s.rating}:${s.trainerNotes}:${s.memberNotes}').join(',');
+      final newLogsHash = nextSnapshot.logs.join(',');
+
+      hasChanged = oldMessagesHash != newMessagesHash ||
+          oldTyping != newTyping ||
+          oldRequestsHash != newRequestsHash ||
+          oldSessionsHash != newSessionsHash ||
+          oldLogsHash != newLogsHash;
+
+      snapshot = nextSnapshot;
       bridgeOnline = true;
       lastError = null;
     } on Object catch (error) {
@@ -68,7 +89,7 @@ class AppController extends ChangeNotifier {
         _appendLog('[ERROR] $lastError');
       }
     }
-    if (!silent) {
+    if (hasChanged || !silent) {
       notifyListeners();
     }
   }

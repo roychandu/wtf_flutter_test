@@ -455,63 +455,130 @@ void _showDevPanel(BuildContext context, AppController app) {
   showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
-    builder: (context) => Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('DevPanel', style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 12),
-          StatusPill(
-            label: app.bridgeOnline ? 'Bridge online' : 'Bridge offline',
-            color: app.bridgeOnline ? WtfColors.success : WtfColors.warning,
-            icon: app.bridgeOnline ? Icons.wifi : Icons.wifi_off,
+    isScrollControlled: true,
+    builder: (context) {
+      final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
+      final screenHeight = MediaQuery.sizeOf(context).height;
+      return Padding(
+        padding: EdgeInsets.only(bottom: keyboardHeight),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: screenHeight * 0.85,
           ),
-          const SizedBox(height: 12),
-          Text('Bridge: ${app.bridge.baseUrl}'),
-          const Text('100ms: HMS_APP_ACCESS_KEY=masked, HMS_APP_SECRET=masked'),
-          const SizedBox(height: 12),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 260),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                for (final log in app.snapshot.logs.reversed)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(
-                      log,
-                      style: const TextStyle(
-                        fontFeatures: [FontFeature.tabularFigures()],
-                      ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'DevPanel',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  StatusPill(
+                    label: app.bridgeOnline ? 'Bridge online' : 'Bridge offline',
+                    color: app.bridgeOnline ? WtfColors.success : WtfColors.warning,
+                    icon: app.bridgeOnline ? Icons.wifi : Icons.wifi_off,
+                  ),
+                  const SizedBox(height: 12),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bridge: ${app.bridge.baseUrl}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: WtfColors.mutedInk,
+                                fontFamily: 'monospace',
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '100ms: HMS_APP_ACCESS_KEY=masked, HMS_APP_SECRET=masked',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: WtfColors.mutedInk,
+                                fontFamily: 'monospace',
+                              ),
+                        ),
+                      ],
                     ),
                   ),
-              ],
+                  const SizedBox(height: 12),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 180),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: WtfColors.background,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: WtfColors.line),
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: app.snapshot.logs.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No developer logs recorded.',
+                                style: TextStyle(
+                                  color: WtfColors.mutedInk,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: const ClampingScrollPhysics(),
+                              itemCount: app.snapshot.logs.length,
+                              itemBuilder: (context, index) {
+                                final log = app.snapshot.logs.reversed.elementAt(index);
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: Text(
+                                    log,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontFeatures: [FontFeature.tabularFigures()],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: app.resetDemo,
+                          icon: const Icon(Icons.refresh),
+                          label: const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('Reset demo'),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: FilledButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.check),
+                          label: const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('Done'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: app.resetDemo,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Reset demo'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.check),
-                  label: const Text('Done'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
+        ),
+      );
+    },
   );
 }

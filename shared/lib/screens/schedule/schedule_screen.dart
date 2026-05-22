@@ -48,6 +48,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               ChoiceChip(
                 selected: selectedDay == i,
                 label: Text(i == 0 ? 'Today' : formatDate(days[i])),
+                labelStyle: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: selectedDay == i ? Colors.white : WtfColors.ink,
+                ),
+                selectedColor: Theme.of(context).colorScheme.primary,
+                backgroundColor: WtfColors.surface,
+                side: BorderSide(
+                  color: selectedDay == i ? Colors.transparent : WtfColors.line,
+                ),
                 onSelected: (_) => setState(() {
                   selectedDay = i;
                   selectedSlot = null;
@@ -65,6 +75,21 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 ChoiceChip(
                   selected: selectedSlot == slot,
                   label: Text(formatTime(slot)),
+                  labelStyle: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: !slot.isAfter(DateTime.now())
+                        ? WtfColors.mutedInk.withValues(alpha: 0.5)
+                        : (selectedSlot == slot ? Colors.white : WtfColors.ink),
+                  ),
+                  selectedColor: Theme.of(context).colorScheme.primary,
+                  backgroundColor: WtfColors.surface,
+                  disabledColor: WtfColors.background,
+                  side: BorderSide(
+                    color: !slot.isAfter(DateTime.now())
+                        ? WtfColors.line.withValues(alpha: 0.4)
+                        : (selectedSlot == slot ? Colors.transparent : WtfColors.line),
+                  ),
                   onSelected: slot.isAfter(DateTime.now())
                       ? (_) => setState(() => selectedSlot = slot)
                       : null,

@@ -470,64 +470,74 @@ Future<void> _showPostCallSheet(
     builder: (context) => StatefulBuilder(
       builder: (context, setModalState) {
         final member = app.role == AppRole.member;
+        final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
+        final screenHeight = MediaQuery.sizeOf(context).height;
         return Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            8,
-            20,
-            MediaQuery.viewInsetsOf(context).bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                member ? 'Rate session' : 'Complete session',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 12),
-              if (member)
-                Row(
+          padding: EdgeInsets.only(bottom: keyboardHeight),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: screenHeight * 0.85,
+            ),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (var i = 1; i <= 5; i++)
-                      IconButton(
-                        tooltip: '$i star',
-                        onPressed: () => setModalState(() => rating = i),
-                        icon: Icon(
-                          i <= rating ? Icons.star : Icons.star_border,
-                          color: WtfColors.warning,
-                        ),
+                    Text(
+                      member ? 'Rate session' : 'Complete session',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    if (member)
+                      Row(
+                        children: [
+                          for (var i = 1; i <= 5; i++)
+                            IconButton(
+                              tooltip: '$i star',
+                              onPressed: () => setModalState(() => rating = i),
+                              icon: Icon(
+                                i <= rating ? Icons.star : Icons.star_border,
+                                color: WtfColors.warning,
+                              ),
+                            ),
+                        ],
                       ),
+                    TextField(
+                      controller: noteController,
+                      minLines: 2,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        labelText: member ? 'Optional note' : 'Trainer notes',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: () async {
+                          await app.updateSession(
+                            session: session,
+                            rating: member ? rating : session.rating,
+                            memberNotes: member
+                                ? noteController.text.trim()
+                                : session.memberNotes,
+                            trainerNotes: member
+                                ? session.trainerNotes
+                                : noteController.text.trim(),
+                          );
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        child: Text(member ? 'Save rating' : 'Mark as complete'),
+                      ),
+                    ),
                   ],
                 ),
-              TextField(
-                controller: noteController,
-                minLines: 2,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: member ? 'Optional note' : 'Trainer notes',
-                ),
               ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () async {
-                  await app.updateSession(
-                    session: session,
-                    rating: member ? rating : session.rating,
-                    memberNotes: member
-                        ? noteController.text.trim()
-                        : session.memberNotes,
-                    trainerNotes: member
-                        ? session.trainerNotes
-                        : noteController.text.trim(),
-                  );
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                  }
-                },
-                child: Text(member ? 'Save rating' : 'Mark as complete'),
-              ),
-            ],
+            ),
           ),
         );
       },
