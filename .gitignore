@@ -17,3 +17,4 @@ trainer_app/.flutter-plugins-dependencies
 trainer_app/build/
 
 .env
+graphify-out
