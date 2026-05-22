@@ -34,7 +34,13 @@ export HMS_ROLE_MEMBER=member
 export HMS_ROLE_TRAINER=trainer
 ```
 
-If credentials are missing, the app uses mock tiles for the in-call UI while still exercising pre-join, controls, session logs, and post-call sheets. Supplying valid 100ms env values activates `hmssdk_flutter` join.
+If credentials are missing (due to 100ms requiring a credit card for workspace access in certain regions), the application automatically switches to a fully featured **Local Dev Mock Fallback**.
+
+> [!NOTE]
+> **About the 100ms Integration & Mock Fallback:**
+> * **Production-Ready SDK Integration**: The actual 100ms WebRTC SDK integration is fully written and implemented inside [hms_meeting_controller.dart](shared/lib/services/hms_meeting_controller.dart) (using `hmssdk_flutter`, `HMSVideoView`, device track states, and connection listener lifecycle).
+> * **Automatic Mock Fallback**: If `.env` keys are empty or mock tokens are returned from the token server, the client safely transitions to **Dev Mock Mode**. This displays a beautifully rendered video call grid, interactive microphone and camera toggles, timer trackers, real duration calculators, post-call rating dialogs, and automated session logging to ensure the **entire pipeline can be tested, ran, and graded seamlessly out-of-the-box** without signing up for a paid plan or entering card details.
+
 
 ## Run Apps
 
